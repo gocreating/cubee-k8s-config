@@ -43,7 +43,7 @@ commands:
             kubectl apply -f << parameters.tillerRBAC >>
 
             # install tiller
-            helm init --service-account tiller --history-max 200
+            helm init --service-account tiller --history-max 10
 
             ################
             ## validation ##
