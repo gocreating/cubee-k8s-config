@@ -55,15 +55,17 @@ commands:
             # should show you both the client and server version
             helm version
 
-      - run:
-          name: Patch Tiller
-          command: |
-            kubectl patch deployment tiller-deploy --patch "$(cat << parameters.tillerPatchDeployment >>)" --namespace kube-system
+      # Not Working...
+      #
+      # - run:
+      #     name: Patch Tiller
+      #     command: |
+      #       kubectl patch deployment tiller-deploy --patch "$(cat << parameters.tillerPatchDeployment >>)" --namespace kube-system
 
-            ################
-            ## validation ##
-            ################
-            kubectl get deployment tiller-deploy --output yaml --namespace kube-system
+      #       ################
+      #       ## validation ##
+      #       ################
+      #       kubectl get deployment tiller-deploy --output yaml --namespace kube-system
 
 jobs:
   deploy_to_staging:
