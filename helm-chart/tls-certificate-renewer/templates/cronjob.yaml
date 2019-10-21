@@ -1,0 +1,31 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-monthly-renew-tls-certificate
+spec:
+  # At 00:00 on day-of-month 1. (https://crontab.guru/#0_0_1_*_*)
+  schedule: "0 0 1 * *"
+  backoffLimit: 2
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: job-renew-tls-certificate
+            image: certbot/dns-google:v0.36.0
+            envFrom:
+              - secretRef:
+                  name: certbot-secrets
+            args:
+            - certonly
+            - --dns-google
+            - --dns-google-credentials "/tmp/xxxxx-xxxxx-xxxxxxxxxxx.json"
+            - --email gocreating@gmail.com
+            - -d cubee.cc
+            - -d "*.cubee.cc"
+            - -d "*.stg.cubee.cc"
+            - --agree-tos
+            - --non-interactive
+            - --dns-google-propagation-seconds 80
+

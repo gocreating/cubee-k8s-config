@@ -1,0 +1,3 @@
+secret:
+  dns-google-credentials: ${DNS_GOOGLE_CREDENTIALS_BASE64}
+  gcloud-service-key: ${GCLOUD_SERVICE_KEY_BASE64}

@@ -1,0 +1,4 @@
+apiVersion: v1
+version: 1.0.0
+name: tls-certificate-renewer
+description: TLS certificate renewer helm chart for kubernetes
