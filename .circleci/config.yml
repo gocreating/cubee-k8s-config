@@ -39,7 +39,7 @@ commands:
           name: Install Helm and Tiller
           command: |
             # install helm
-            curl https://raw.githubusercontent.com/helm/helm/v2.14.3/scripts/get | bash
+            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
             kubectl apply -f << parameters.tillerRBAC >>
 
             # install tiller
