@@ -1,3 +1,46 @@
+image:
+  repository: gocreating/tls-certificate-renewer
+  tag: ${IMAGE_TAG}
+  env:
+  - name: DNS_GOOGLE_CREDENTIALS
+    valueFrom:
+      secretKeyRef:
+        name: tls-certificate-renewer-secret
+        key: dns-google-credentials
+  - name: GCLOUD_SERVICE_KEY
+    valueFrom:
+      secretKeyRef:
+        name: tls-certificate-renewer-secret
+        key: gcloud-service-key
+  - name: GOOGLE_PROJECT_ID
+    valueFrom:
+      secretKeyRef:
+        name: tls-certificate-renewer-secret
+        key: google-project-id
+  - name: GOOGLE_COMPUTE_ZONE
+    valueFrom:
+      secretKeyRef:
+        name: tls-certificate-renewer-secret
+        key: google-compute-zone
+  - name: GOOGLE_CLUSTER_NAME
+    valueFrom:
+      secretKeyRef:
+        name: tls-certificate-renewer-secret
+        key: google-cluster-name
+  - name: ACME_SERVER
+    value: "https://acme-v01.api.letsencrypt.org/"
+  - name: EMAIL
+    value: "gocreating@gmail.com"
+  - name: REQUEST_DOMAINS
+    value: "cubee.cc,*.cubee.cc,*.stg.cubee.cc"
+  - name: ROOT_DOMAIN
+    value: "cubee.cc"
+  - name: K8S_TLS_SECRET_NAME
+    value: "cubee-cc-tls"
+
 secret:
   dns-google-credentials: ${DNS_GOOGLE_CREDENTIALS_BASE64}
   gcloud-service-key: ${GCLOUD_SERVICE_KEY_BASE64}
+  google-project-id: ${GOOGLE_PROJECT_ID_BASE64}
+  google-compute-zone: ${GOOGLE_COMPUTE_ZONE_BASE64}
+  google-cluster-name: ${GOOGLE_CLUSTER_NAME_BASE64}

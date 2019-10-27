@@ -13,19 +13,6 @@ spec:
           restartPolicy: OnFailure
           containers:
           - name: job-renew-tls-certificate
-            image: certbot/dns-google:v0.36.0
-            envFrom:
-              - secretRef:
-                  name: certbot-secrets
-            args:
-            - certonly
-            - --dns-google
-            - --dns-google-credentials "/tmp/xxxxx-xxxxx-xxxxxxxxxxx.json"
-            - --email gocreating@gmail.com
-            - -d cubee.cc
-            - -d "*.cubee.cc"
-            - -d "*.stg.cubee.cc"
-            - --agree-tos
-            - --non-interactive
-            - --dns-google-propagation-seconds 80
-
+            image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+            env:
+{{ toYaml .Values.image.env | indent 12 }}
