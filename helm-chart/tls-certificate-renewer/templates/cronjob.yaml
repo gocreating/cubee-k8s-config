@@ -5,12 +5,16 @@ metadata:
 spec:
   # At 00:00 on day-of-month 1. (https://crontab.guru/#0_0_1_*_*)
   schedule: "0 0 1 * *"
-  backoffLimit: 2
+  backoffLimit: 1
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit : 3
+  successfulJobsHistoryLimit: 3
+  startingDeadlineSeconds: 600
   jobTemplate:
     spec:
       template:
         spec:
-          restartPolicy: OnFailure
+          restartPolicy: Never
           containers:
           - name: job-renew-tls-certificate
             image: {{ .Values.image.repository }}:{{ .Values.image.tag }}

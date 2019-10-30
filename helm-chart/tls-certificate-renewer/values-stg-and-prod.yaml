@@ -28,7 +28,7 @@ image:
         name: tls-certificate-renewer-secret
         key: google-cluster-name
   - name: ACME_SERVER
-    value: "https://acme-v01.api.letsencrypt.org/"
+    value: "https://acme-v02.api.letsencrypt.org/directory"
   - name: EMAIL
     value: "gocreating@gmail.com"
   - name: REQUEST_DOMAINS

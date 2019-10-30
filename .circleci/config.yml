@@ -75,8 +75,8 @@ commands:
           command: |
             TAG=release-$(echo $CIRCLE_SHA1 | cut -c 1-8)-$CIRCLE_BUILD_NUM
 
-            DNS_GOOGLE_CREDENTIALS_BASE64=`echo $DNS_GOOGLE_CREDENTIALS | base64`
-            GCLOUD_SERVICE_KEY_BASE64=`echo $GCLOUD_SERVICE_KEY | base64`
+            DNS_GOOGLE_CREDENTIALS_BASE64=`echo $DNS_GOOGLE_CREDENTIALS | base64 -w 0`
+            GCLOUD_SERVICE_KEY_BASE64=`echo $GCLOUD_SERVICE_KEY | base64 -w 0`
             GOOGLE_PROJECT_ID_BASE64=`echo $GOOGLE_PROJECT_ID | base64`
             GOOGLE_COMPUTE_ZONE_BASE64=`echo $GOOGLE_COMPUTE_ZONE | base64`
             GOOGLE_CLUSTER_NAME_BASE64=`echo $GOOGLE_CLUSTER_NAME | base64`
