@@ -137,17 +137,20 @@ jobs:
           tillerRBAC: "tiller/rbac-config.yaml"
           tillerPatchDeployment: "tiller/patch-deployment.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
-  # deploy_to_production:
-  #   docker:
-  #     - image: google/cloud-sdk
-  #   working_directory: ~/my-working-directory
-  #   environment:
-  #     - GOOGLE_PROJECT_ID: "cubee-247317"
-  #     - GOOGLE_COMPUTE_ZONE: "us-west1-a"
-  #     - GOOGLE_CLUSTER_NAME: "cubee-prod"
-  #   steps:
-  #     - cmd_deploy:
-  #         tillerRBACFileName: "tiller/rbac-config.yaml"
+  deploy_to_production:
+    docker:
+      - image: google/cloud-sdk
+    working_directory: ~/my-working-directory
+    environment:
+      - GOOGLE_PROJECT_ID: "cubee-247317"
+      - GOOGLE_COMPUTE_ZONE: "asia-east1-a"
+      - GOOGLE_CLUSTER_NAME: "cubee-prod"
+    steps:
+      - cmd_deploy:
+          priorityClass: "priority-class.yaml"
+          tillerRBAC: "tiller/rbac-config.yaml"
+          tillerPatchDeployment: "tiller/patch-deployment.yaml"
+          tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
 
 workflows:
   version: 2
@@ -159,11 +162,11 @@ workflows:
               only: master
             tags:
               only: /release-.*/
-      # - deploy_to_production:
-      #     requires:
-      #       - deploy_to_staging
-      #     filters:
-      #       branches:
-      #         ignore: /.*/
-      #       tags:
-      #         only: /release-.*/
+      - deploy_to_production:
+          requires:
+            - deploy_to_staging
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /release-.*/
