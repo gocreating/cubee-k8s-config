@@ -18,6 +18,24 @@ commands:
         default: "values-stg-and-prod.yaml"
     steps:
       - checkout
+      - attach_workspace:
+          at: ./my-persist-workspace
+      - run:
+          name: Retrieve Persisted Environment Variable
+          command: |
+            cat ./my-persist-workspace/persist-env-var.txt >> $BASH_ENV
+      - run:
+          name: Setup Environment Variable
+          command: |
+            GOOGLE_PROJECT_ID_BASE64=`echo $GOOGLE_PROJECT_ID | base64`
+            GOOGLE_COMPUTE_ZONE_BASE64=`echo $GOOGLE_COMPUTE_ZONE | base64`
+            GOOGLE_CLUSTER_NAME_BASE64=`echo $GOOGLE_CLUSTER_NAME | base64`
+
+            touch ./non-persist-env-var.txt
+            echo "export GOOGLE_PROJECT_ID_BASE64=$GOOGLE_PROJECT_ID_BASE64" >> ./non-persist-env-var.txt
+            echo "export GOOGLE_COMPUTE_ZONE_BASE64=$GOOGLE_COMPUTE_ZONE_BASE64" >> ./non-persist-env-var.txt
+            echo "export GOOGLE_CLUSTER_NAME_BASE64=$GOOGLE_CLUSTER_NAME_BASE64" >> ./non-persist-env-var.txt
+            cat ./non-persist-env-var.txt >> $BASH_ENV
       - run:
           name: Setup Google Cloud SDK
           command: |
@@ -71,44 +89,12 @@ commands:
       #       kubectl get deployment tiller-deploy --output yaml --namespace kube-system
 
       - run:
-          name: Setup Environment Variable
-          command: |
-            TAG=release-$(echo $CIRCLE_SHA1 | cut -c 1-8)-$CIRCLE_BUILD_NUM
-
-            DNS_GOOGLE_CREDENTIALS_BASE64=`echo $DNS_GOOGLE_CREDENTIALS | base64 -w 0`
-            GCLOUD_SERVICE_KEY_BASE64=`echo $GCLOUD_SERVICE_KEY | base64 -w 0`
-            GOOGLE_PROJECT_ID_BASE64=`echo $GOOGLE_PROJECT_ID | base64`
-            GOOGLE_COMPUTE_ZONE_BASE64=`echo $GOOGLE_COMPUTE_ZONE | base64`
-            GOOGLE_CLUSTER_NAME_BASE64=`echo $GOOGLE_CLUSTER_NAME | base64`
-
-            mkdir -p ./my-persist-workspace
-            touch ./my-persist-workspace/persist-env-var.txt
-            echo "export IMAGE_TAG=$TAG" >> ./my-persist-workspace/persist-env-var.txt
-            echo "export DNS_GOOGLE_CREDENTIALS_BASE64=$DNS_GOOGLE_CREDENTIALS_BASE64" >> ./my-persist-workspace/persist-env-var.txt
-            echo "export GCLOUD_SERVICE_KEY_BASE64=$GCLOUD_SERVICE_KEY_BASE64" >> ./my-persist-workspace/persist-env-var.txt
-            echo "export GOOGLE_PROJECT_ID_BASE64=$GOOGLE_PROJECT_ID_BASE64" >> ./my-persist-workspace/persist-env-var.txt
-            echo "export GOOGLE_COMPUTE_ZONE_BASE64=$GOOGLE_COMPUTE_ZONE_BASE64" >> ./my-persist-workspace/persist-env-var.txt
-            echo "export GOOGLE_CLUSTER_NAME_BASE64=$GOOGLE_CLUSTER_NAME_BASE64" >> ./my-persist-workspace/persist-env-var.txt
-            cat ./my-persist-workspace/persist-env-var.txt >> $BASH_ENV
-
-      - setup_remote_docker
-
-      - run:
-          name: Build & Push TLS Certificate Renewer Docker Image
-          command: |
-            docker build \
-              -t gocreating/tls-certificate-renewer:${IMAGE_TAG} \
-              -f ./tls-certificate-renewer/Dockerfile .
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
-            docker push gocreating/tls-certificate-renewer:$IMAGE_TAG
-
-      - run:
           name: Deploy TLS Certificate Renewer
           command: |
             apt-get install -qq -y gettext
             envsubst < ./helm-chart/tls-certificate-renewer/<< parameters.tlsRenewerHelmValueFileName >> > ./helm-chart/tls-certificate-renewer/values.yaml
             cd ./helm-chart/tls-certificate-renewer
-            helm upgrade tls-certificate-renewer . -f values.yaml --install --recreate-pods --force --reset-values
+            helm upgrade tls-certificate-renewer . -f values.yaml --install --recreate-pods --reset-values
 
             ################
             ## validation ##
@@ -117,12 +103,42 @@ commands:
             kubectl describe secret tls-certificate-renewer-secret
             kubectl describe cronjob cronjob-monthly-renew-tls-certificate
 
+jobs:
+  build_tls_renewer_docker_image:
+    docker:
+      - image: google/cloud-sdk
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Setup Environment Variable
+          command: |
+            TAG=release-$(echo $CIRCLE_SHA1 | cut -c 1-8)-$CIRCLE_BUILD_NUM
+            DNS_GOOGLE_CREDENTIALS_BASE64=`echo $DNS_GOOGLE_CREDENTIALS | base64 -w 0`
+            GCLOUD_SERVICE_KEY_BASE64=`echo $GCLOUD_SERVICE_KEY | base64 -w 0`
+
+            mkdir -p ./my-persist-workspace
+            touch ./my-persist-workspace/persist-env-var.txt
+            echo "export IMAGE_TAG=$TAG" >> ./my-persist-workspace/persist-env-var.txt
+            echo "export DNS_GOOGLE_CREDENTIALS_BASE64=$DNS_GOOGLE_CREDENTIALS_BASE64" >> ./my-persist-workspace/persist-env-var.txt
+            echo "export GCLOUD_SERVICE_KEY_BASE64=$GCLOUD_SERVICE_KEY_BASE64" >> ./my-persist-workspace/persist-env-var.txt
+            cat ./my-persist-workspace/persist-env-var.txt >> $BASH_ENV
+      - run:
+          name: Build & Push TLS Certificate Renewer Docker Image
+          command: |
+            docker build \
+              -t gocreating/tls-certificate-renewer:${IMAGE_TAG} \
+              -f ./tls-certificate-renewer/Dockerfile .
+      - run:
+          name: Push Docker Image
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push gocreating/tls-certificate-renewer:$IMAGE_TAG
       - persist_to_workspace:
           root: ./my-persist-workspace
           paths:
             - persist-env-var.txt
 
-jobs:
   deploy_to_staging:
     docker:
       - image: google/cloud-sdk
@@ -137,6 +153,7 @@ jobs:
           tillerRBAC: "tiller/rbac-config.yaml"
           tillerPatchDeployment: "tiller/patch-deployment.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
+
   deploy_to_production:
     docker:
       - image: google/cloud-sdk
@@ -156,7 +173,15 @@ workflows:
   version: 2
   deploy_k8s_config:
     jobs:
+      - build_tls_renewer_docker_image:
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /release-.*/
       - deploy_to_staging:
+          requires:
+            - build_tls_renewer_docker_image
           filters:
             branches:
               only: master
@@ -164,6 +189,7 @@ workflows:
               only: /release-.*/
       - deploy_to_production:
           requires:
+            - build_tls_renewer_docker_image
             - deploy_to_staging
           filters:
             branches:
