@@ -3,6 +3,7 @@ kind: PriorityClass
 metadata:
   name: high-priority
 value: 1000000
+# preemptionPolicy: Never # requrie v1.15+
 globalDefault: false
 description: "for high priority pod"
 ---
