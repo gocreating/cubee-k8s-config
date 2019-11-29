@@ -20,6 +20,7 @@ variable "project" {
 variable "cluster_stg" {
   default = {
     cluster_name = "cubee-stg"
+    master_and_node_version = "1.14"
     node_pool_name = "node-pool-stg"
     node_machine_type = "g1-small"
     node_count = 2

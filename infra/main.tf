@@ -16,6 +16,9 @@ resource "google_container_cluster" "staging" {
   remove_default_node_pool = true
   initial_node_count       = 1
 
+  min_master_version = var.cluster_stg.master_and_node_version
+  node_version = var.cluster_stg.master_and_node_version
+
   master_auth {
     username = ""
     password = ""
