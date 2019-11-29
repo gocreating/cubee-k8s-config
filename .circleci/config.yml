@@ -7,12 +7,6 @@ commands:
       priorityClass:
         type: string
         default: "priority-class.yaml"
-      tillerRBAC:
-        type: string
-        default: "tiller/rbac-config.yaml"
-      tillerPatchDeployment:
-        type: string
-        default: "tiller/patch-deployment.yaml"
       tlsRenewerHelmValueFileName:
         type: string
         default: "values-stg-and-prod.yaml"
@@ -45,7 +39,13 @@ commands:
             gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
             gcloud --quiet container clusters get-credentials ${GOOGLE_CLUSTER_NAME}
             rm ./gcloud-service-key.json
-
+      - run:
+          name: Setup Helm
+          command: |
+            curl https://get.helm.sh/helm-v3.0.0-linux-amd64.tar.gz --output helm-v3.0.0-linux-amd64.tar.gz
+            tar -zxvf helm-v3.0.0-linux-amd64.tar.gz
+            mv linux-amd64/helm /usr/local/bin/helm
+            helm repo add stable https://kubernetes-charts.storage.googleapis.com/
       - run:
           name: Setup PriorityClass
           command: |
@@ -55,38 +55,6 @@ commands:
             ## validation ##
             ################
             kubectl get priorityclasses.scheduling.k8s.io
-
-      - run:
-          name: Install Helm and Tiller
-          command: |
-            # install helm
-            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
-            kubectl apply -f << parameters.tillerRBAC >>
-
-            # install tiller
-            helm init --service-account tiller --history-max 10
-
-            ################
-            ## validation ##
-            ################
-
-            # should see tiller running
-            kubectl get pods --namespace kube-system
-
-            # should show you both the client and server version
-            helm version
-
-      # Not Working...
-      #
-      # - run:
-      #     name: Patch Tiller
-      #     command: |
-      #       kubectl patch deployment tiller-deploy --patch "$(cat << parameters.tillerPatchDeployment >>)" --namespace kube-system
-
-      #       ################
-      #       ## validation ##
-      #       ################
-      #       kubectl get deployment tiller-deploy --output yaml --namespace kube-system
 
       - run:
           name: Deploy TLS Certificate Renewer
@@ -144,14 +112,12 @@ jobs:
       - image: google/cloud-sdk
     working_directory: ~/my-working-directory
     environment:
-      - GOOGLE_PROJECT_ID: "cubee-247317"
+      - GOOGLE_PROJECT_ID: "cubee-259905"
       - GOOGLE_COMPUTE_ZONE: "asia-east1-a"
       - GOOGLE_CLUSTER_NAME: "cubee-stg"
     steps:
       - cmd_deploy:
           priorityClass: "priority-class.yaml"
-          tillerRBAC: "tiller/rbac-config.yaml"
-          tillerPatchDeployment: "tiller/patch-deployment.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
 
   deploy_to_production:
@@ -159,14 +125,12 @@ jobs:
       - image: google/cloud-sdk
     working_directory: ~/my-working-directory
     environment:
-      - GOOGLE_PROJECT_ID: "cubee-247317"
+      - GOOGLE_PROJECT_ID: "cubee-259905"
       - GOOGLE_COMPUTE_ZONE: "asia-east1-a"
       - GOOGLE_CLUSTER_NAME: "cubee-prod"
     steps:
       - cmd_deploy:
           priorityClass: "priority-class.yaml"
-          tillerRBAC: "tiller/rbac-config.yaml"
-          tillerPatchDeployment: "tiller/patch-deployment.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
 
 workflows:
