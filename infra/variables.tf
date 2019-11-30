@@ -28,6 +28,17 @@ variable "cluster_stg" {
   }
 }
 
+variable "cluster_prod" {
+  default = {
+    cluster_name = "cubee-prod"
+    master_and_node_version = "1.14"
+    node_pool_name = "node-pool-prod"
+    node_machine_type = "g1-small"
+    node_count = 2
+    node_disk_size_gb = 10
+  }
+}
+
 variable "dns" {
   default = {
     zone_name = "cubee-cc-zone"
