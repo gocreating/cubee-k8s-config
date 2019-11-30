@@ -23,7 +23,6 @@ resource "google_container_cluster" "staging" {
   initial_node_count       = 1
 
   min_master_version = var.cluster_stg.master_and_node_version
-  node_version = var.cluster_stg.master_and_node_version
 
   master_auth {
     username = ""
@@ -49,6 +48,7 @@ resource "google_container_node_pool" "staging_preemptible_nodes" {
   name       = var.cluster_stg.node_pool_name
   location   = var.project.zone
   cluster    = google_container_cluster.staging.name
+  version    = var.cluster_stg.master_and_node_version
   node_count = var.cluster_stg.node_count
 
   node_config {
@@ -85,7 +85,6 @@ resource "google_container_cluster" "production" {
   initial_node_count       = 1
 
   min_master_version = var.cluster_prod.master_and_node_version
-  node_version = var.cluster_prod.master_and_node_version
 
   master_auth {
     username = ""
@@ -111,6 +110,7 @@ resource "google_container_node_pool" "production_preemptible_nodes" {
   name       = var.cluster_prod.node_pool_name
   location   = var.project.zone
   cluster    = google_container_cluster.production.name
+  version    = var.cluster_prod.master_and_node_version
   node_count = var.cluster_prod.node_count
 
   node_config {
