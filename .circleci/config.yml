@@ -55,14 +55,19 @@ commands:
             ## validation ##
             ################
             kubectl get priorityclasses.scheduling.k8s.io
-
+      - run:
+          name: Deploy Nginx Ingress Controller
+          command: |
+            cd ./helm-chart/nginx-ingress
+            cp ./values-stg-and-prod.yaml ./values.yaml
+            helm upgrade nginx-ingress . -f values.yaml --install --reset-values
       - run:
           name: Deploy TLS Certificate Renewer
           command: |
             apt-get install -qq -y gettext
             envsubst < ./helm-chart/tls-certificate-renewer/<< parameters.tlsRenewerHelmValueFileName >> > ./helm-chart/tls-certificate-renewer/values.yaml
             cd ./helm-chart/tls-certificate-renewer
-            helm upgrade tls-certificate-renewer . -f values.yaml --install --recreate-pods --reset-values
+            helm upgrade tls-certificate-renewer . -f values.yaml --install --reset-values
 
             ################
             ## validation ##
