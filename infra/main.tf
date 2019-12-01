@@ -136,26 +136,10 @@ resource "google_container_node_pool" "production_preemptible_nodes" {
 ##            ##
 ################
 
-resource "google_dns_managed_zone" "primary_zone" {
-  name = var.dns.zone_name
-  dns_name = var.dns.dns_name
-}
-
-resource "google_dns_record_set" "ns" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = google_dns_managed_zone.primary_zone.dns_name
-  type = "NS"
-  ttl = 21600
-  rrdatas = var.dns.ns_records
-}
-
-resource "google_dns_record_set" "soa" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = google_dns_managed_zone.primary_zone.dns_name
-  type = "SOA"
-  ttl = 21600
-  rrdatas = var.dns.soa_records
-}
+# resource "google_dns_managed_zone" "primary_zone" {
+#   name = var.dns.zone_name
+#   dns_name = var.dns.dns_name
+# }
 
 ######################
 ##                  ##
@@ -163,27 +147,27 @@ resource "google_dns_record_set" "soa" {
 ##                  ##
 ######################
 
-resource "google_dns_record_set" "stg_main" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = "stg.${google_dns_managed_zone.primary_zone.dns_name}"
-  type = "A"
-  ttl = 300
+# resource "google_dns_record_set" "stg_main" {
+#   managed_zone = google_dns_managed_zone.primary_zone.name
+#   name = "stg.${google_dns_managed_zone.primary_zone.dns_name}"
+#   type = "A"
+#   ttl = 300
 
-  rrdatas = [
-    google_container_cluster.staging.endpoint,
-  ]
-}
+#   rrdatas = [
+#     google_container_cluster.staging.endpoint,
+#   ]
+# }
 
-resource "google_dns_record_set" "stg_wildcard_main" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = "*.stg.${google_dns_managed_zone.primary_zone.dns_name}"
-  type = "A"
-  ttl = 300
+# resource "google_dns_record_set" "stg_wildcard_main" {
+#   managed_zone = google_dns_managed_zone.primary_zone.name
+#   name = "*.stg.${google_dns_managed_zone.primary_zone.dns_name}"
+#   type = "A"
+#   ttl = 300
 
-  rrdatas = [
-    google_container_cluster.staging.endpoint,
-  ]
-}
+#   rrdatas = [
+#     google_container_cluster.staging.endpoint,
+#   ]
+# }
 
 #########################
 ##                     ##
@@ -191,24 +175,24 @@ resource "google_dns_record_set" "stg_wildcard_main" {
 ##                     ##
 #########################
 
-resource "google_dns_record_set" "prod_main" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = google_dns_managed_zone.primary_zone.dns_name
-  type = "A"
-  ttl = 300
+# resource "google_dns_record_set" "prod_main" {
+#   managed_zone = google_dns_managed_zone.primary_zone.name
+#   name = google_dns_managed_zone.primary_zone.dns_name
+#   type = "A"
+#   ttl = 300
 
-  rrdatas = [
-    google_container_cluster.production.endpoint,
-  ]
-}
+#   rrdatas = [
+#     google_container_cluster.production.endpoint,
+#   ]
+# }
 
-resource "google_dns_record_set" "prod_wildcard_main" {
-  managed_zone = google_dns_managed_zone.primary_zone.name
-  name = "*.${google_dns_managed_zone.primary_zone.dns_name}"
-  type = "A"
-  ttl = 300
+# resource "google_dns_record_set" "prod_wildcard_main" {
+#   managed_zone = google_dns_managed_zone.primary_zone.name
+#   name = "*.${google_dns_managed_zone.primary_zone.dns_name}"
+#   type = "A"
+#   ttl = 300
 
-  rrdatas = [
-    google_container_cluster.production.endpoint,
-  ]
-}
+#   rrdatas = [
+#     google_container_cluster.production.endpoint,
+#   ]
+# }

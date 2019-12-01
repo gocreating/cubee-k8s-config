@@ -43,15 +43,5 @@ variable "dns" {
   default = {
     zone_name = "cubee-cc-zone"
     dns_name = "cubee.cc."
-    # transfer godaddy dns to cloud dns
-    ns_records = [
-      "ns-cloud-c1.googledomains.com.",
-      "ns-cloud-c2.googledomains.com.",
-      "ns-cloud-c3.googledomains.com.",
-      "ns-cloud-c4.googledomains.com.",
-    ]
-    soa_records = [
-      "ns-cloud-c1.googledomains.com. cloud-dns-hostmaster.google.com. 1 21600 3600 259200 300",
-    ]
   }
 }
