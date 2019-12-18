@@ -59,8 +59,7 @@ commands:
           name: Deploy Nginx Ingress Controller
           command: |
             cd ./helm-chart/nginx-ingress
-            cp ./values-stg-and-prod.yaml ./values.yaml
-            helm upgrade nginx-ingress . -f values.yaml --install --reset-values
+            helm upgrade nginx-ingress . -f values-default.yaml -f values-stg-and-prod.yaml --install --reset-values
       - run:
           name: Deploy TLS Certificate Renewer
           command: |
