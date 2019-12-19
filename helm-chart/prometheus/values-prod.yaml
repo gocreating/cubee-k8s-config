@@ -1,0 +1,20 @@
+alertmanager:
+  persistentVolume:
+    size: 1Gi
+pushgateway:
+  persistentVolume:
+    size: 1Gi
+server:
+  persistentVolume:
+    size: 4Gi
+serverFiles:
+  prometheus.yml:
+    scrape_configs:
+      - job_name: nginx-ingress
+        metrics_path: /metrics
+        scrape_interval: 30s
+        static_configs:
+          - targets:
+#            - nginx-ingress-controller:80
+#            - nginx-ingress-controller-stats:18080
+            - nginx-ingress-controller-metrics:9913

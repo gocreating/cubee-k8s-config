@@ -10,6 +10,12 @@ commands:
       tlsRenewerHelmValueFileName:
         type: string
         default: "values-stg-and-prod.yaml"
+      prometheusHelmValueFileName:
+        type: string
+        default: "values-stg.yaml"
+      grafanaHelmValueFileName:
+        type: string
+        default: "values-stg.yaml"
     steps:
       - checkout
       - attach_workspace:
@@ -59,7 +65,17 @@ commands:
           name: Deploy Nginx Ingress Controller
           command: |
             cd ./helm-chart/nginx-ingress
-            helm upgrade nginx-ingress . -f values-default.yaml -f values-stg-and-prod.yaml --install --reset-values
+            helm upgrade nginx-ingress . -f values-default.yaml,values-stg-and-prod.yaml --install --reset-values
+      - run:
+          name: Deploy Prometheus
+          command: |
+            cd ./helm-chart/prometheus
+            helm upgrade prometheus . -f values-default.yaml,<< parameters.prometheusHelmValueFileName >> --install --reset-values
+      - run:
+          name: Deploy Grafana
+          command: |
+            cd ./helm-chart/grafana
+            helm upgrade grafana . -f values-default.yaml,<< parameters.grafanaHelmValueFileName >> --install --reset-values
       - run:
           name: Deploy TLS Certificate Renewer
           command: |
@@ -123,6 +139,8 @@ jobs:
       - cmd_deploy:
           priorityClass: "priority-class.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
+          prometheusHelmValueFileName: "values-stg.yaml"
+          grafanaHelmValueFileName: "values-stg.yaml"
 
   deploy_to_production:
     docker:
@@ -136,6 +154,8 @@ jobs:
       - cmd_deploy:
           priorityClass: "priority-class.yaml"
           tlsRenewerHelmValueFileName: "values-stg-and-prod.yaml"
+          prometheusHelmValueFileName: "values-prod.yaml"
+          grafanaHelmValueFileName: "values-prod.yaml"
 
 workflows:
   version: 2
