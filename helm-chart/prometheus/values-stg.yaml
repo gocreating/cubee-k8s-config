@@ -1,6 +1,7 @@
 alertmanager:
-  persistentVolume:
-    size: 1Gi
+  enabled: false
+  # persistentVolume:
+  #   size: 1Gi
 pushgateway:
   persistentVolume:
     size: 1Gi
